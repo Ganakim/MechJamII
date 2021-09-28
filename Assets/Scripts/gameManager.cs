@@ -17,6 +17,7 @@ public class gameManager : MonoBehaviour {
     public int density;
     [Range(0, 100)]
     public int shopChance;
+    public Room currentRoom;
     public static Dictionary<int, Room> level = new Dictionary<int, Room>();
     private static Dictionary<string, string> opposites = new Dictionary<string, string>{
         {"north", "south"},
@@ -24,6 +25,7 @@ public class gameManager : MonoBehaviour {
         {"south",  "north"},
         {"west",  "east"}
     };
+    private Room redraw;
 
     void Start() {
         minRooms = Mathf.Clamp(minRooms, 5, maxX * maxY);
@@ -34,21 +36,20 @@ public class gameManager : MonoBehaviour {
         foreach (KeyValuePair<int, Room> a in level) {
             Debug.Log(a.Key + ": " + JsonUtility.ToJson(a.Value).ToString());
         }
-        // Debug.Log(JsonUtility.ToJson(new Part(1)).ToString());
-        // Debug.Log(JsonUtility.ToJson(new Part(2)).ToString());
-        // Debug.Log(JsonUtility.ToJson(new Part(3)).ToString());
-        // Debug.Log(JsonUtility.ToJson(new Part(4)).ToString());
-        // Debug.Log(JsonUtility.ToJson(new Part(5)).ToString());
     }
 
     void Update() {
-        
+        if (currentRoom != redraw) {
+            redraw = currentRoom;
+            GameObject.Find("CurrentRoom").GetComponent<RoomController>().DrawRoom(currentRoom);
+        }
     }
 
     void GenerateLevel() {
         int start = Random.Range(0, maxX * maxY - 1);
         Debug.Log("Starting at Index of " + start);
         GenerateRoom(start);
+        currentRoom = level[start];
         void GenerateRoom(int index, string dir = null) {
             Room room = new Room(index, dir != null ? opposites[dir] : null);
             level.Add(index, room);
@@ -62,14 +63,6 @@ public class gameManager : MonoBehaviour {
                 }
             }
         }
-    }
-
-    void OpenMenu() {
-        GameObject.Find("Menu").SetActive(true);
-    }
-
-    void OpenMap() {
-
     }
 
     public static void shuffle(string[] texts) {

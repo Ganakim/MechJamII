@@ -5,7 +5,6 @@ using CustomClasses;
 
 public class RoomController : MonoBehaviour {
     private Dictionary<string, GameObject> walls = new Dictionary<string, GameObject>();
-    private string roomFolder = "";
 
     void Start() {
         walls.Add("north", transform.Find("nWall").gameObject);
@@ -18,24 +17,25 @@ public class RoomController : MonoBehaviour {
         
     }
 
-    void DrawRoom(Room room, bool isMini) {
+    public void DrawRoom(Room room, bool isMini = false) {
         string[] dirs = new string[]{"north", "east", "south", "west"};
+        string roomFolder = "";
         foreach (string d in dirs) {
-            roomFolder += d[0];
             if (room.exit(d).wall) {
-                walls[d].GetComponent<Collider>().enabled = false;
-                walls[d].GetComponent<Renderer>().enabled = true;
-            } else {
-                walls[d].GetComponent<Collider>().isTrigger = false;
+                roomFolder += d[0];
             }
+            walls[d].GetComponent<SpriteRenderer>().enabled = room.exit(d).wall;
+            walls[d].GetComponent<BoxCollider2D>().isTrigger = !room.exit(d).wall;
         }
-        GameObject floor = transform.Find("floor").gameObject;
+        GameObject floor = transform.Find("Floor").gameObject;
         if (isMini) {
             floor.GetComponent<SpriteRenderer>().sprite = Resources.Load("Sprites/rectBase.png") as Sprite;
-            floor.GetComponent<SpriteRenderer>().color = new Color (1, 1, 1, 100/255);
         } else {
-            Sprite[] floors = Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder);
-            floor.GetComponent<SpriteRenderer>().sprite = floors[Random.Range(0, floors.Length-1)];
+            if (roomFolder != ""){
+                Debug.Log(Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder).Length);
+                Sprite[] floors = Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder);
+                floor.GetComponent<SpriteRenderer>().sprite = floors[Random.Range(0, floors.Length-1)];
+            }
         }
     }
 }
