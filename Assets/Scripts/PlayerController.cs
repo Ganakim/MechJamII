@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour{
     protected Rigidbody2D rb;
@@ -8,7 +9,25 @@ public class PlayerController : MonoBehaviour{
     public float FireRate = 1;
     public float MoveSpeed = 5f;
     public GameObject Projectile;
-    private float cooldown = 0f;
+    private PlayerControls controls;
+    private InputAction move;
+    private InputAction rotate;
+    private InputAction rotateM;
+    private bool usingMouse = false;
+    private float cooldown;
+
+    void Awake() {
+        controls = new PlayerControls();
+        move = controls.Gameplay.Move;
+        rotate = controls.Gameplay.Rotate;
+        rotateM = controls.Gameplay.RotateMouse;
+        rotate.performed += a => {usingMouse = false;};
+        rotateM.performed += a => {usingMouse = true;};
+    }
+
+    void OnEnable() {
+        controls.Enable();
+    }
 
     void Start(){
         rb = GetComponent<Rigidbody2D>();
@@ -16,18 +35,14 @@ public class PlayerController : MonoBehaviour{
     }
 
     void FixedUpdate() {
-        rb.MovePosition(transform.position + new Vector3(Input.GetAxis("LeftStickHorizontal"), Input.GetAxis("LeftStickVertical"), 0) * MoveSpeed * Time.deltaTime);
+        rb.MovePosition(transform.position + new Vector3(move.ReadValue<Vector2>().x, move.ReadValue<Vector2>().y, 0) * MoveSpeed * Time.deltaTime);
     }
     
     void Update(){
-        if (Input.mousePresent) {
-            Vector3 mouseDir = Input.mousePosition - Camera.main.WorldToScreenPoint(transform.position);
-            transform.rotation = Quaternion.AngleAxis(0-(Mathf.Atan2(mouseDir.x, mouseDir.y) * Mathf.Rad2Deg), Vector3.forward);
-        } else {
-            transform.rotation = Quaternion.Euler(new Vector3(Input.GetAxis("RightStickHorizontal"), Input.GetAxis("RightStickVertical"), 0));
-        }
+        Vector2 lookDir = usingMouse ? (Vector2) (transform.position - Camera.main.ScreenToWorldPoint(rotateM.ReadValue<Vector2>())) : rotate.ReadValue<Vector2>();
+        transform.rotation = Quaternion.AngleAxis((0 - Mathf.Atan2(lookDir.x, lookDir.y) * Mathf.Rad2Deg + (usingMouse ? 180 : 0)), Vector3.forward);
         cooldown -= Time.deltaTime;
-        if (Input.GetButton("Fire1") && cooldown <= 0f) {
+        if (controls.Gameplay.Shoot.triggered && cooldown <= 0f) {
             cooldown = 1 / FireRate;
             GameObject projectile = Instantiate(Projectile, Projectile.transform.position, Quaternion.identity) as GameObject;
             projectile.GetComponent<Rigidbody2D>().simulated = true;
