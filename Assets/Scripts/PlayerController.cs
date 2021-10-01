@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour{
-    protected Rigidbody2D rb;
     protected gameManager gameManager;
-    public float FireRate = 1;
-    public float MoveSpeed = 5f;
+    protected Rigidbody2D rb;
+    public int damage;
+    public int attackSpeed;
+    public int health;
+    public int speed;
     public GameObject Projectile;
     private PlayerControls controls;
     private InputAction move;
@@ -73,5 +76,10 @@ public class PlayerController : MonoBehaviour{
                 break;
         }
         
+    }
+    public void Die() {
+        if(health == 0){
+            SceneManager.LoadScene(2);
+        }
     }
 }
