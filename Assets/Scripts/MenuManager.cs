@@ -22,12 +22,12 @@ public class MenuManager : MonoBehaviour {
 
     gameManager = GameObject.Find("GameManager").GetComponent<gameManager>();
     playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+    menus = new Dictionary<string, GameObject>{
       {"map", GameObject.Find("Map")},
       {"stats", GameObject.Find("Stats")},
       {"mech", GameObject.Find("Mech")},
       {"controls", GameObject.Find("Controls")},
     };
-    menus = new Dictionary<string, GameObject> {
   }
 
   void Update() {
