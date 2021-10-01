@@ -76,19 +76,19 @@ public class PlayerController : MonoBehaviour{
         switch (other.gameObject.name) {
             case "nWall":
                 gameManager.currentRoom = gameManager.currentRoom.exit("north").room;
-                transform.position = new Vector3(transform.position.x, -3.4f, 0);
+                transform.position = new Vector3(transform.position.x, -3.25f, 0);
                 break;
             case "eWall":
                 gameManager.currentRoom = gameManager.currentRoom.exit("east").room;
-                transform.position = new Vector3(-7.4f, transform.position.y, 0);
+                transform.position = new Vector3(-7.25f, transform.position.y, 0);
                 break;
             case "sWall":
                 gameManager.currentRoom = gameManager.currentRoom.exit("south").room;
-                transform.position = new Vector3(transform.position.x, 3.4f, 0);
+                transform.position = new Vector3(transform.position.x, 3.25f, 0);
                 break;
             case "wWall":
                 gameManager.currentRoom = gameManager.currentRoom.exit("west").room;
-                transform.position = new Vector3(7.4f, transform.position.y, 0);
+                transform.position = new Vector3(7.25f, transform.position.y, 0);
                 break;
             default:
                 break;
