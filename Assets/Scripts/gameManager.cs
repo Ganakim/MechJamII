@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using CustomClasses;
+using UnityEngine.UI;
 
 public class gameManager : MonoBehaviour {
     public int maxX;
@@ -17,6 +18,9 @@ public class gameManager : MonoBehaviour {
     public int density;
     [Range(0, 100)]
     public int shopChance;
+    public int scrapMetal;
+    // public TextMeshProUGUI scrapMetalText;
+    
     public static Dictionary<int, Room> level = new Dictionary<int, Room>();
     private static Dictionary<string, string> opposites = new Dictionary<string, string>{
         {"north", "south"},
@@ -64,13 +68,9 @@ public class gameManager : MonoBehaviour {
         }
     }
 
-    void OpenMenu() {
-        GameObject.Find("Menu").SetActive(true);
-    }
-
-    void OpenMap() {
-
-    }
+    // void OpenMenu() {
+    //     GameObject.Find("Menu").SetActive(true);
+    // }
 
     public static void shuffle(string[] texts) {
         for (int t = 0; t < texts.Length; t++ ) {
@@ -79,5 +79,30 @@ public class gameManager : MonoBehaviour {
             texts[t] = texts[r];
             texts[r] = tmp;
         }
+    }
+
+    public void OpenMainMenuScene() {
+        SceneManager.LoadScene(0);
+    }
+
+    public void ExitGame() {
+        // Environment.Exit();
+    }
+
+    public void StartGame() {
+        SceneManager.LoadScene(1);
+    }
+
+    public void GameOver() {
+        SceneManager.LoadScene(2);
+    }
+
+    public void RestartGame() {
+        SceneManager.LoadScene(1);
+    }
+
+    public void UpdateScrapMetalScore(int scrapMetalToAdd) {
+        scrapMetal += scrapMetalToAdd;
+        // scrapMetalText.text = "Scrap Metal: " + scrapMetal;
     }
 }
