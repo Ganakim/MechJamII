@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using CustomClasses;
+using UnityEngine.UI;
 
 public class gameManager : MonoBehaviour {
     public int maxX;
@@ -17,6 +18,9 @@ public class gameManager : MonoBehaviour {
     public int density;
     [Range(0, 100)]
     public int shopChance;
+    public int scrapMetal;
+    // public TextMeshProUGUI scrapMetalText;
+    
     public Room currentRoom;
     public static Dictionary<int, Room> level = new Dictionary<int, Room>();
     private static Dictionary<string, string> opposites = new Dictionary<string, string>{
@@ -72,5 +76,30 @@ public class gameManager : MonoBehaviour {
             texts[t] = texts[r];
             texts[r] = tmp;
         }
+    }
+
+    public void OpenMainMenuScene() {
+        SceneManager.LoadScene(0);
+    }
+
+    public void ExitGame() {
+        // Environment.Exit();
+    }
+
+    public void StartGame() {
+        SceneManager.LoadScene(1);
+    }
+
+    public void GameOver() {
+        SceneManager.LoadScene(2);
+    }
+
+    public void RestartGame() {
+        SceneManager.LoadScene(1);
+    }
+
+    public void UpdateScrapMetalScore(int scrapMetalToAdd) {
+        scrapMetal += scrapMetalToAdd;
+        // scrapMetalText.text = "Scrap Metal: " + scrapMetal;
     }
 }
