@@ -8,6 +8,7 @@ using CustomClasses;
 using UnityEngine.UI;
 
 public class gameManager : MonoBehaviour {
+    public int depth;
     public int maxX;
     public int maxY;
     [Range(5, 100)]
@@ -31,11 +32,47 @@ public class gameManager : MonoBehaviour {
     };
     private Room redraw;
 
+    public Dictionary<string, (Projectile projectile, Dictionary<string, float> props)> weaponArchetypes = new Dictionary<string, (Projectile, Dictionary<string, float>)>{
+        {"Machine Gun", (new Projectile("Bullet", 20f, 1f), new Dictionary<string, float>{
+            {"attackSpeed", 10f}
+        })},
+        {"Cannon", (new Projectile("CannonBall", 10f, 1f), new Dictionary<string, float>{
+            {"health", 20f}
+        })},
+        {"Torpedo", (null, new Dictionary<string, float>{
+            {"damage", 8f}
+        })},
+        {"Laser Sword", (new Projectile("Sword", 0f, .2f), new Dictionary<string, float>{
+            {"speed", 2f}
+        })}
+    };
+
+    private static (string name, string type, int tier, float? health, float? damage, float? attackSpeed, float? speed)[] parts = new (string, string, int, float?, float?, float?, float?)[]{
+        ("Left-Overs", "leftArm", 1, 0f, 0f, 0f, 0f),
+        ("Not-Quite-Righty-Tighty", "rightArm", 1, 0f, 0f, 0f, 0f)
+    };
+
     void Start() {
         minRooms = Mathf.Clamp(minRooms, 5, maxX * maxY);
         maxRooms = Mathf.Clamp(maxRooms, minRooms, maxX * maxY);
         Debug.Log("Generating Level with " + minRooms + "-" + maxRooms + " rooms, in a " + maxX + "x" + maxY + " grid:");
-        GenerateLevel();
+        bool hasBoss;
+        do {
+            level = new Dictionary<int, Room>();
+            GenerateLevel();
+            hasBoss = false;
+            foreach (Room room in level.Values) {
+                if (Array.FindAll(new string[4]{"north", "east", "south", "west"}, dir=>room.exit(dir).wall).Length == 3 && room != currentRoom) {
+                    if (hasBoss) {
+                        room.tags.Add("shop");
+                        break;
+                    } else {
+                        room.tags.Add("boss");
+                        hasBoss = true;
+                    }
+                }
+            }
+        } while (level.Count < minRooms || level.Count > maxRooms || !hasBoss);
         Debug.Log("Done!");
         foreach (KeyValuePair<int, Room> a in level) {
             Debug.Log(a.Key + ": " + JsonUtility.ToJson(a.Value).ToString());
@@ -69,13 +106,8 @@ public class gameManager : MonoBehaviour {
         }
     }
 
-    public static void shuffle(string[] texts) {
-        for (int t = 0; t < texts.Length; t++ ) {
-            string tmp = texts[t];
-            int r = Random.Range(t, texts.Length);
-            texts[t] = texts[r];
-            texts[r] = tmp;
-        }
+    public Enemy[] SpawnEnemies() {
+        return new Enemy[0];
     }
 
     public void OpenMainMenuScene() {
@@ -101,5 +133,14 @@ public class gameManager : MonoBehaviour {
     public void UpdateScrapMetalScore(int scrapMetalToAdd) {
         scrapMetal += scrapMetalToAdd;
         // scrapMetalText.text = "Scrap Metal: " + scrapMetal;
+    }
+
+    public static void shuffle(string[] texts) {
+        for (int t = 0; t < texts.Length; t++ ) {
+            string tmp = texts[t];
+            int r = Random.Range(t, texts.Length);
+            texts[t] = texts[r];
+            texts[r] = tmp;
+        }
     }
 }

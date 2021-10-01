@@ -32,9 +32,10 @@ public class RoomController : MonoBehaviour {
             floor.GetComponent<SpriteRenderer>().sprite = Resources.Load("Sprites/rectBase.png") as Sprite;
         } else {
             if (roomFolder != ""){
-                Debug.Log(Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder).Length);
                 Sprite[] floors = Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder);
                 floor.GetComponent<SpriteRenderer>().sprite = floors[Random.Range(0, floors.Length-1)];
+            } else {
+                floor.GetComponent<SpriteRenderer>().sprite = Resources.Load("Sprites/rooms/Base.png") as Sprite;
             }
         }
     }
