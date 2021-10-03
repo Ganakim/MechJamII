@@ -20,6 +20,7 @@ public class gameManager : MonoBehaviour {
     [Range(0, 100)]
     public int shopChance;
     public int scrapMetal;
+    protected MenuManager menuManager;
     // public TextMeshProUGUI scrapMetalText;
     
     public Room currentRoom;
@@ -53,6 +54,7 @@ public class gameManager : MonoBehaviour {
     };
 
     void Start() {
+        menuManager = GameObject.Find("MenuManager").GetComponent<MenuManager>();
         minRooms = Mathf.Clamp(minRooms, 5, maxX * maxY);
         maxRooms = Mathf.Clamp(maxRooms, minRooms, maxX * maxY);
         Debug.Log("Generating Level with " + minRooms + "-" + maxRooms + " rooms, in a " + maxX + "x" + maxY + " grid:");
@@ -83,6 +85,7 @@ public class gameManager : MonoBehaviour {
         if (currentRoom != redraw) {
             redraw = currentRoom;
             GameObject.Find("CurrentRoom").GetComponent<RoomController>().DrawRoom(currentRoom);
+            currentRoom.tags.Add("visited");
         }
     }
 
@@ -99,7 +102,6 @@ public class gameManager : MonoBehaviour {
             foreach (string d in dirs) {
                 var dirInfo = room.exit(d);
                 if (dirInfo.room == null && !dirInfo.wall) {
-                    Debug.Log("Creating room: " + dirInfo.i + " " + d + " of here");
                     GenerateRoom(dirInfo.i, d);
                 }
             }

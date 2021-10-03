@@ -32,20 +32,11 @@ namespace CustomClasses {
                 {"west", this.index - 1}
             };
             if (this._walls.ContainsKey(dir)) {
-                Debug.Log(this.index + ": There's a wall " + dir + " of me!" + (this._walls[dir] == "oob" ? " It's the edge of the world!!" : ""));
                 return (null, this._walls[dir] == "wall" || this._walls[dir] == "oob", this._walls[dir] == "oob", dirs[dir]);
             } else {
                 if (level.ContainsKey(dirs[dir])) {
-                    Debug.Log(this.index + ": There's a Room " + dir + " of me!");
                     return (level[dirs[dir]], false, false, dirs[dir]);
-                    // if (level[dirs[dir]].exit(opposites[dir]).wall) {
-                    //     Debug.Log(this.index + ": But it's blocked by a wall.");
-                    //     return (level[dirs[dir]], true, false, dirs[dir]);
-                    // } else {
-                    //     Debug.Log("And the door is wide open!");
-                    // }
                 } else {
-                    Debug.Log(this.index + ": No Room detected " + dir + " of me!");
                     return (null, false, false, dirs[dir]);
                 }
             }
@@ -84,8 +75,7 @@ namespace CustomClasses {
             string[] d = new string[]{"north", "east", "south", "west"};
             gameManager.shuffle(d);
             foreach (string dir in d) {
-                if (req != dir && !this._walls.ContainsKey(dir) && this._walls.Count < 3 && Random.Range(0, 100) <= density) {
-                    Debug.Log("Putting a wall " + dir + " of here, just for fun!");
+                if (req != dir && !this._walls.ContainsKey(dir) && this._walls.Count < 3 && Random.Range(0, 100) <= density && this.exit(opposites[dir]).room == null) {
                     this._walls.Add(dir, "wall");
                     this.tags.Add(dir);
                 }

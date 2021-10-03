@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using CustomClasses;
 
 public class MenuManager : MonoBehaviour {
   protected gameManager gameManager;
@@ -11,9 +12,11 @@ public class MenuManager : MonoBehaviour {
   protected Dictionary<string, GameObject> menus;
   protected PlayerControls controls;
   public Dictionary<int, GameObject> menuItems = new Dictionary<int, GameObject>();
+  public GameObject MiniMapRoomPrefab;
   private MenuItemScript previousMenuItemSc;
   private MenuItemScript menuItemSc;
   int previousSelection;
+  private List<GameObject> miniMapRooms = new List<GameObject>();
 
   void Awake() {
     controls = new PlayerControls();
@@ -28,7 +31,6 @@ public class MenuManager : MonoBehaviour {
     // playButton = GetComponent<PlayButton>();
     // playButton.onClick.AddListener(gameManager.StartGame());
 
-    gameManager = GameObject.Find("GameManager").GetComponent<gameManager>();
     playerController = GameObject.Find("Player").GetComponent<PlayerController>();
     menus = new Dictionary<string, GameObject>{
       {"map", GameObject.Find("Map")},
@@ -78,6 +80,22 @@ public class MenuManager : MonoBehaviour {
     } else {
       CloseMenus();
       menus[menu].SetActive(true);
+      if (menu == "map") {
+        Debug.Log("hit");
+        foreach (var room in miniMapRooms) {
+          GameObject.Destroy(room);
+        }
+        gameManager = GameObject.Find("GameManager").GetComponent<gameManager>();
+        foreach (Room room in gameManager.level.Values) {
+          if (room.tags.Contains("visited")) {
+            GameObject r = Instantiate(MiniMapRoomPrefab, GameObject.Find("Map").transform, true) as GameObject;
+            r.GetComponent<RoomController>().DrawRoom(room, true);
+            r.name = "Room " + room.index;
+            r.transform.position = new Vector3(((room.index % gameManager.maxX) - (gameManager.maxY / 2)) * 1.75f, (Mathf.Floor(room.index / gameManager.maxX) - (gameManager.maxX / 2)) * -1f, 0);
+            miniMapRooms.Add(r);
+          }
+        }
+      }
     }
   }
 }
