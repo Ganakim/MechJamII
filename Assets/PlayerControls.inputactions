@@ -22,7 +22,7 @@
                     "interactions": ""
                 },
                 {
-                    "name": "RotateMouse",
+                    "name": "RotateM",
                     "type": "Value",
                     "id": "1ff91823-7c9c-49d8-95df-302795abff96",
                     "expectedControlType": "",
@@ -31,7 +31,7 @@
                 },
                 {
                     "name": "Shoot",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "ca0d273d-4f1f-452d-9484-5b9bc90838f4",
                     "expectedControlType": "Button",
                     "processors": "",
@@ -39,9 +39,9 @@
                 },
                 {
                     "name": "Menu",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "c0f5a110-f1bf-4dfc-942d-50b59c86ce45",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "Dpad",
                     "processors": "",
                     "interactions": ""
                 },
@@ -334,7 +334,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RotateMouse",
+                    "action": "RotateM",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

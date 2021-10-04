@@ -35,7 +35,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
-                    ""name"": ""RotateMouse"",
+                    ""name"": ""RotateM"",
                     ""type"": ""Value"",
                     ""id"": ""1ff91823-7c9c-49d8-95df-302795abff96"",
                     ""expectedControlType"": """",
@@ -44,7 +44,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": ""Shoot"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""ca0d273d-4f1f-452d-9484-5b9bc90838f4"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
@@ -52,9 +52,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": ""Menu"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""c0f5a110-f1bf-4dfc-942d-50b59c86ce45"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": ""Dpad"",
                     ""processors"": """",
                     ""interactions"": """"
                 },
@@ -347,7 +347,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RotateMouse"",
+                    ""action"": ""RotateM"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -360,7 +360,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_Move = m_Gameplay.FindAction("Move", throwIfNotFound: true);
         m_Gameplay_Rotate = m_Gameplay.FindAction("Rotate", throwIfNotFound: true);
-        m_Gameplay_RotateMouse = m_Gameplay.FindAction("RotateMouse", throwIfNotFound: true);
+        m_Gameplay_RotateM = m_Gameplay.FindAction("RotateM", throwIfNotFound: true);
         m_Gameplay_Shoot = m_Gameplay.FindAction("Shoot", throwIfNotFound: true);
         m_Gameplay_Menu = m_Gameplay.FindAction("Menu", throwIfNotFound: true);
         m_Gameplay_Special = m_Gameplay.FindAction("Special", throwIfNotFound: true);
@@ -416,7 +416,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     private IGameplayActions m_GameplayActionsCallbackInterface;
     private readonly InputAction m_Gameplay_Move;
     private readonly InputAction m_Gameplay_Rotate;
-    private readonly InputAction m_Gameplay_RotateMouse;
+    private readonly InputAction m_Gameplay_RotateM;
     private readonly InputAction m_Gameplay_Shoot;
     private readonly InputAction m_Gameplay_Menu;
     private readonly InputAction m_Gameplay_Special;
@@ -427,7 +427,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         public GameplayActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Gameplay_Move;
         public InputAction @Rotate => m_Wrapper.m_Gameplay_Rotate;
-        public InputAction @RotateMouse => m_Wrapper.m_Gameplay_RotateMouse;
+        public InputAction @RotateM => m_Wrapper.m_Gameplay_RotateM;
         public InputAction @Shoot => m_Wrapper.m_Gameplay_Shoot;
         public InputAction @Menu => m_Wrapper.m_Gameplay_Menu;
         public InputAction @Special => m_Wrapper.m_Gameplay_Special;
@@ -447,9 +447,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Rotate.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotate;
                 @Rotate.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotate;
                 @Rotate.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotate;
-                @RotateMouse.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateMouse;
-                @RotateMouse.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateMouse;
-                @RotateMouse.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateMouse;
+                @RotateM.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateM;
+                @RotateM.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateM;
+                @RotateM.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnRotateM;
                 @Shoot.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
                 @Shoot.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
                 @Shoot.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
@@ -472,9 +472,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Rotate.started += instance.OnRotate;
                 @Rotate.performed += instance.OnRotate;
                 @Rotate.canceled += instance.OnRotate;
-                @RotateMouse.started += instance.OnRotateMouse;
-                @RotateMouse.performed += instance.OnRotateMouse;
-                @RotateMouse.canceled += instance.OnRotateMouse;
+                @RotateM.started += instance.OnRotateM;
+                @RotateM.performed += instance.OnRotateM;
+                @RotateM.canceled += instance.OnRotateM;
                 @Shoot.started += instance.OnShoot;
                 @Shoot.performed += instance.OnShoot;
                 @Shoot.canceled += instance.OnShoot;
@@ -495,7 +495,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
-        void OnRotateMouse(InputAction.CallbackContext context);
+        void OnRotateM(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnMenu(InputAction.CallbackContext context);
         void OnSpecial(InputAction.CallbackContext context);
