@@ -25,8 +25,12 @@ public class RoomController : MonoBehaviour {
             }
         }
         GameObject floor = transform.Find("Floor").gameObject;
-        Sprite[] floors = Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder);
-        floor.GetComponent<SpriteRenderer>().sprite = floors[Random.Range(0, floors.Length-1)];
+        if (roomFolder == "") {
+            floor.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/rooms/Base");
+        } else {
+            Sprite[] floors = Resources.LoadAll<Sprite>("Sprites/rooms/" + roomFolder);
+            floor.GetComponent<SpriteRenderer>().sprite = floors[Random.Range(0, floors.Length-1)];
+        }
         if (isMini) {
             transform.localScale = new Vector3(.1f, .1f, .1f);
             floor.GetComponent<SpriteRenderer>().sortingOrder = 5;

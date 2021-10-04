@@ -44,7 +44,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": ""Shoot"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""ca0d273d-4f1f-452d-9484-5b9bc90838f4"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",

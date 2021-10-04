@@ -81,7 +81,6 @@ public class MenuManager : MonoBehaviour {
       CloseMenus();
       menus[menu].SetActive(true);
       if (menu == "map") {
-        Debug.Log("hit");
         foreach (var room in miniMapRooms) {
           GameObject.Destroy(room);
         }

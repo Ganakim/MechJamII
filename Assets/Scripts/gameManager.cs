@@ -22,7 +22,7 @@ public class gameManager : MonoBehaviour {
     public int scrapMetal;
     protected MenuManager menuManager;
     // public TextMeshProUGUI scrapMetalText;
-    
+
     public Room currentRoom;
     public static Dictionary<int, Room> level = new Dictionary<int, Room>();
     private static Dictionary<string, string> opposites = new Dictionary<string, string>{
@@ -34,26 +34,22 @@ public class gameManager : MonoBehaviour {
     private Room redraw;
 
     public Dictionary<string, (Projectile projectile, Dictionary<string, float> props)> weaponArchetypes = new Dictionary<string, (Projectile, Dictionary<string, float>)>{
-        {"Machine Gun", (new Projectile("Bullet", 20f, 1f), new Dictionary<string, float>{
+        {"Machine Gun", (new Projectile(new List<string>{"Bullet"}, 1000f, 1f), new Dictionary<string, float>{
             {"attackSpeed", 10f}
         })},
-        {"Cannon", (new Projectile("CannonBall", 10f, 1f), new Dictionary<string, float>{
+        {"Cannon", (new Projectile(new List<string>{"Cannon Ball"}, 800f, 1f), new Dictionary<string, float>{
             {"health", 20f}
         })},
-        {"Torpedo", (null, new Dictionary<string, float>{
+        {"Torpedo", (new Projectile(null, 500f, 2f), new Dictionary<string, float>{
             {"damage", 8f}
         })},
-        {"Laser Sword", (new Projectile("Sword", 0f, .2f), new Dictionary<string, float>{
+        {"Laser Sword", (new Projectile(new List<string>{"Slash 1", "Slash 2"}, 0f, .2f), new Dictionary<string, float>{
             {"speed", 2f}
         })}
     };
 
-    private static (string name, string type, int tier, float? health, float? damage, float? attackSpeed, float? speed)[] parts = new (string, string, int, float?, float?, float?, float?)[]{
-        ("Left-Overs", "leftArm", 1, 0f, 0f, 0f, 0f),
-        ("Not-Quite-Righty-Tighty", "rightArm", 1, 0f, 0f, 0f, 0f)
-    };
-
     void Start() {
+        Physics2D.gravity = new Vector3(0, 0, 0);
         menuManager = GameObject.Find("MenuManager").GetComponent<MenuManager>();
         minRooms = Mathf.Clamp(minRooms, 5, maxX * maxY);
         maxRooms = Mathf.Clamp(maxRooms, minRooms, maxX * maxY);
@@ -76,22 +72,21 @@ public class gameManager : MonoBehaviour {
             }
         } while (level.Count < minRooms || level.Count > maxRooms || !hasBoss);
         Debug.Log("Done!");
-        foreach (KeyValuePair<int, Room> a in level) {
-            Debug.Log(a.Key + ": " + JsonUtility.ToJson(a.Value).ToString());
-        }
     }
 
     void Update() {
         if (currentRoom != redraw) {
             redraw = currentRoom;
             GameObject.Find("CurrentRoom").GetComponent<RoomController>().DrawRoom(currentRoom);
-            currentRoom.tags.Add("visited");
+            if (!currentRoom.tags.Contains("visited")) {
+                currentRoom.tags.Add("visited");
+            }
+            menuManager.CloseMenus();
         }
     }
 
     void GenerateLevel() {
         int start = Random.Range(0, maxX * maxY - 1);
-        Debug.Log("Starting at Index of " + start);
         GenerateRoom(start);
         currentRoom = level[start];
         void GenerateRoom(int index, string dir = null) {

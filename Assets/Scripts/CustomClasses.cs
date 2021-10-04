@@ -75,7 +75,7 @@ namespace CustomClasses {
             string[] d = new string[]{"north", "east", "south", "west"};
             gameManager.shuffle(d);
             foreach (string dir in d) {
-                if (req != dir && !this._walls.ContainsKey(dir) && this._walls.Count < 3 && Random.Range(0, 100) <= density && this.exit(opposites[dir]).room == null) {
+                if (req != dir && !this._walls.ContainsKey(dir) && this._walls.Count < 3 && Random.Range(0, 100) <= density && this.exit(dir).room == null) {
                     this._walls.Add(dir, "wall");
                     this.tags.Add(dir);
                 }
@@ -85,12 +85,12 @@ namespace CustomClasses {
 
     [Serializable]
     public class Projectile {
-        public string sprite;
+        public List<string> sprites;
         public float lifetime;
         public float speed;
 
-        public Projectile(string s, float? s2, float? l) {
-            sprite = "Sprites/Projectiles/" + s;
+        public Projectile(List<string> s, float? s2, float? l) {
+            sprites = s;
             speed = s2 != null ? (float) s2 : 10f;
             lifetime = l != null ? (float) l : 1f;
         }
@@ -99,61 +99,15 @@ namespace CustomClasses {
     public class Part {
         private static gameManager gameManager = GameObject.Find("GameManager").GetComponent<gameManager>();
         public string type;
-        public Sprite sprite;
         public int tier;
-        public float _damage;
-        public float damage {
-            get {
-                float d = this._damage;
-                foreach (Part p in this.slots) {
-                    d += p.damage;
-                }
-                return d;
-            }
-            set {
-                this._damage = value;
-            }
-        }
-        public float _attackSpeed;
-        public float attackSpeed {
-            get {
-                float a = this._attackSpeed;
-                foreach (Part p in this.slots) {
-                    a += p.attackSpeed;
-                }
-                return a;
-            }
-            set {
-                this._attackSpeed = value;
-            }
-        }
-        public float _health;
-        public float health {
-            get {
-                float h = this._health;
-                foreach (Part p in this.slots) {
-                    h += p.health;
-                }
-                return h;
-            }
-            set {
-                this._health = value;
-            }
-        }
-        public float _speed;
-        public float speed {
-            get {
-                float s = this._speed;
-                foreach (Part p in this.slots) {
-                    s += p.speed;
-                }
-                return s;
-            }
-            set {
-                this._speed = value;
-            }
-        }
-        public Part[] slots;
+        public float damage;
+        public float attackSpeed;
+        public float health;
+        public float speed;
+        public List<Part> slots = new List<Part>();
+        public List<GameObject> slotObjects = new List<GameObject>();
+        public float slotNums;
+        public bool canShoot = true;
 
         private float this[string prop]{
             get {
@@ -188,10 +142,10 @@ namespace CustomClasses {
             };
             gameManager.shuffle(props);
             for (int i = 0; i < Random.Range(Mathf.Clamp(tier - 2, 0, 3), Mathf.Floor(.5f * tier + 2)); i++) {
-                this[props[i]] = Random.Range(0, tier + 5) * propScales[props[i]];
+                this[props[i]] = (int) Mathf.Round(Random.Range(0f, tier + 5) * propScales[props[i]]);
             }
             if (type == "arm") {
-                this.slots = new Part[(int) Random.Range(Mathf.Ceil(.5f * tier - 1), Mathf.Floor(.5f * tier + 1))];
+                this.slotNums = (int) Mathf.Round(Random.Range(Mathf.Ceil(.5f * tier - 1), Mathf.Floor(.5f * tier + 1)));
             } else {
                 var info = GameObject.Find("GameManager").GetComponent<gameManager>().weaponArchetypes[type];
                 foreach (string prop in props) {
@@ -202,8 +156,64 @@ namespace CustomClasses {
             }
         }
 
-        public void Fire() {
+        public GameObject Draw(Transform parent, Vector3? offset = null){
+            GameObject part = new GameObject("part");
+            part.AddComponent<SpriteRenderer>();
+            part.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/" + (type == "arm" ? "arms/" : "weapons/" + type + "_") + "tier" + tier);
+            part.GetComponent<SpriteRenderer>().sortingOrder = type == "arm" ? 3 : 4;
+            part.transform.parent = parent;
+            part.transform.localPosition = offset != null ? (Vector3) offset : new Vector3(0, 0, 0);
+            part.transform.localScale = new Vector3(1, 1, 1);
+            foreach (GameObject weapon in slotObjects) {
+                slotObjects.Remove(weapon);
+                GameObject.Destroy(weapon);
+            }
+            for (int i = 0; i < slotNums; i++) {
+                if (slots.Count > i) {
+                    slotObjects.Add(slots[i].Draw(part.transform, new Vector3(0, i - (slotNums/2), 0)));
+                }
+            }
+            return part;
+        }
 
+        public void Fire(MonoBehaviour mb, float bonusDamage = 0f, float bonusAttackSpeed = 0f, GameObject pos = null) {
+            if (type == "arm") {
+                for (int i = 0; i < slotNums; i++) {
+                    if (slots.Count > i) {
+                        slots[i].Fire(mb, damage, attackSpeed, slotObjects[i]);
+                    }
+                }
+            } else {
+                if (canShoot) {
+                    var projectileInfo = GameObject.Find("GameManager").GetComponent<gameManager>().weaponArchetypes[type].projectile;
+                    GameObject projectile = new GameObject("projectile");
+                    projectile.transform.position = pos.transform.position;
+                    projectile.transform.rotation = pos.transform.rotation;
+                    if (type == "Laser Sword") {
+                        projectile.transform.position += projectile.transform.up;
+                    }
+                    projectile.AddComponent<SpriteRenderer>();
+                    if (projectileInfo.sprites != null) {
+                        projectile.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/projectiles/" + projectileInfo.sprites[Random.Range(0, projectileInfo.sprites.Count)]);
+                        GameObject.Destroy(projectile, projectileInfo.lifetime);
+                    } else {
+                        projectile.GetComponent<SpriteRenderer>().sprite = pos.GetComponent<SpriteRenderer>().sprite;
+                        pos.GetComponent<SpriteRenderer>().enabled = false;
+                        GameObject.Destroy(projectile, 1/Mathf.Clamp(attackSpeed + bonusAttackSpeed, 1, 999));
+                    }
+                    projectile.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                    projectile.AddComponent<Rigidbody2D>();
+                    projectile.GetComponent<Rigidbody2D>().AddForce(projectile.transform.up * projectileInfo.speed);
+                    canShoot = false;
+                    mb.StartCoroutine(Reload(bonusAttackSpeed, pos));
+                }
+            }
+        }
+
+        public IEnumerator Reload(float bonusAttackSpeed = 0f, GameObject launchSelfObject = null) {
+            yield return new WaitForSeconds(1/Mathf.Clamp(attackSpeed + bonusAttackSpeed, 1, 999));
+            launchSelfObject.GetComponent<SpriteRenderer>().enabled = true;
+            canShoot = true;
         }
     }
 
