@@ -8,7 +8,7 @@ using CustomClasses;
 using UnityEngine.UI;
 
 public class gameManager : MonoBehaviour {
-    public int depth;
+    public static int depth;
     public int maxX;
     public int maxY;
     [Range(5, 100)]
@@ -18,9 +18,9 @@ public class gameManager : MonoBehaviour {
     [Range(0, 100)]
     public int density;
     [Range(0, 100)]
-    public int shopChance;
     public int scrapMetal;
     protected MenuManager menuManager;
+    public GameObject piratePrefab;
     // public TextMeshProUGUI scrapMetalText;
 
     public Room currentRoom;
@@ -32,6 +32,7 @@ public class gameManager : MonoBehaviour {
         {"west",  "east"}
     };
     private Room redraw;
+    public int enemies = 0;
 
     public Dictionary<string, (Projectile projectile, Dictionary<string, float> props)> weaponArchetypes = new Dictionary<string, (Projectile, Dictionary<string, float>)>{
         {"Machine Gun", (new Projectile(new List<string>{"Bullet"}, 1000f, 1f), new Dictionary<string, float>{
@@ -77,9 +78,18 @@ public class gameManager : MonoBehaviour {
     void Update() {
         if (currentRoom != redraw) {
             redraw = currentRoom;
-            GameObject.Find("CurrentRoom").GetComponent<RoomController>().DrawRoom(currentRoom);
+            RoomController room = GameObject.Find("CurrentRoom").GetComponent<RoomController>();
+            room.DrawRoom(currentRoom);
             if (!currentRoom.tags.Contains("visited")) {
                 currentRoom.tags.Add("visited");
+                SpawnEnemies();
+                room.Lock();
+            }
+            if (enemies == 0 && room.locked) {
+                room.Unlock();
+            }
+            foreach (GameObject item in GameObject.FindGameObjectsWithTag("item")) {
+                GameObject.Destroy(item);
             }
             menuManager.CloseMenus();
         }
@@ -89,6 +99,7 @@ public class gameManager : MonoBehaviour {
         int start = Random.Range(0, maxX * maxY - 1);
         GenerateRoom(start);
         currentRoom = level[start];
+        currentRoom.tags.Add("visited");
         void GenerateRoom(int index, string dir = null) {
             Room room = new Room(index, dir != null ? opposites[dir] : null);
             level.Add(index, room);
@@ -103,8 +114,13 @@ public class gameManager : MonoBehaviour {
         }
     }
 
-    public Enemy[] SpawnEnemies() {
-        return new Enemy[0];
+    public void SpawnEnemies() {
+        for (int i = 0; i < Random.Range(2, 12); i++) {
+            enemies += 1;
+            GameObject enemy = Instantiate(piratePrefab) as GameObject;
+            enemy.GetComponent<EnemyController>().tier = Mathf.Clamp(Random.Range(depth - 1, depth + 2), 1, 6);
+            enemy.SetActive(true);
+        }
     }
 
     public void OpenMainMenuScene() {

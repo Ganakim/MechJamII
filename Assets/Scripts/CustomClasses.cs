@@ -137,11 +137,11 @@ namespace CustomClasses {
             Dictionary<string, int> propScales = new Dictionary<string, int> {
                 {"damage", 10},
                 {"attackSpeed", 1},
-                {"health", 12},
+                {"health", 100},
                 {"speed", 1}
             };
             gameManager.shuffle(props);
-            for (int i = 0; i < Random.Range(Mathf.Clamp(tier - 2, 0, 3), Mathf.Floor(.5f * tier + 2)); i++) {
+            for (int i = 0; i < Mathf.Clamp(Random.Range(tier - 2, Mathf.Floor(.5f * tier + 2)), 0, 4); i++) {
                 this[props[i]] = (int) Mathf.Round(Random.Range(0f, tier + 5) * propScales[props[i]]);
             }
             if (type == "arm") {
@@ -162,6 +162,7 @@ namespace CustomClasses {
             part.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/" + (type == "arm" ? "arms/" : "weapons/" + type + "_") + "tier" + tier);
             part.GetComponent<SpriteRenderer>().sortingOrder = type == "arm" ? 3 : 4;
             part.transform.parent = parent;
+            part.tag = parent.tag;
             part.transform.localPosition = offset != null ? (Vector3) offset : new Vector3(0, 0, 0);
             part.transform.localScale = new Vector3(1, 1, 1);
             foreach (GameObject weapon in slotObjects) {
@@ -176,11 +177,11 @@ namespace CustomClasses {
             return part;
         }
 
-        public void Fire(MonoBehaviour mb, float bonusDamage = 0f, float bonusAttackSpeed = 0f, GameObject pos = null) {
+        public void Fire(MonoBehaviour mb, string tag, float bonusDamage = 0f, float bonusAttackSpeed = 0f, GameObject pos = null) {
             if (type == "arm") {
                 for (int i = 0; i < slotNums; i++) {
                     if (slots.Count > i) {
-                        slots[i].Fire(mb, damage, attackSpeed, slotObjects[i]);
+                        slots[i].Fire(mb, tag, damage, attackSpeed, slotObjects[i]);
                     }
                 }
             } else {
@@ -189,46 +190,55 @@ namespace CustomClasses {
                     GameObject projectile = new GameObject("projectile");
                     projectile.transform.position = pos.transform.position;
                     projectile.transform.rotation = pos.transform.rotation;
+                    projectile.transform.Rotate(0f, 0f, Random.Range(-attackSpeed, attackSpeed) * 2f);
+                    projectile.transform.localScale = new Vector3(-pos.transform.lossyScale.x, 1, 1);
                     if (type == "Laser Sword") {
-                        projectile.transform.position += projectile.transform.up;
+                        projectile.transform.position += projectile.transform.up * Random.Range(1f, 1.5f);
                     }
                     projectile.AddComponent<SpriteRenderer>();
                     if (projectileInfo.sprites != null) {
                         projectile.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/projectiles/" + projectileInfo.sprites[Random.Range(0, projectileInfo.sprites.Count)]);
-                        GameObject.Destroy(projectile, projectileInfo.lifetime);
                     } else {
                         projectile.GetComponent<SpriteRenderer>().sprite = pos.GetComponent<SpriteRenderer>().sprite;
                         pos.GetComponent<SpriteRenderer>().enabled = false;
-                        GameObject.Destroy(projectile, 1/Mathf.Clamp(attackSpeed + bonusAttackSpeed, 1, 999));
                     }
+                    GameObject.Destroy(projectile, projectileInfo.lifetime);
                     projectile.GetComponent<SpriteRenderer>().sortingOrder = 2;
                     projectile.AddComponent<Rigidbody2D>();
+                    projectile.AddComponent<CircleCollider2D>();
+                    projectile.GetComponent<CircleCollider2D>().isTrigger = true;
                     projectile.GetComponent<Rigidbody2D>().AddForce(projectile.transform.up * projectileInfo.speed);
+                    projectile.AddComponent<ProjectileController>();
+                    projectile.GetComponent<ProjectileController>().damage = damage + bonusDamage;
+                    projectile.tag = tag + "Projectile";
+
                     canShoot = false;
-                    mb.StartCoroutine(Reload(bonusAttackSpeed, pos));
+                    mb.StartCoroutine(Reload(attackSpeed + bonusAttackSpeed, pos));
                 }
             }
         }
 
-        public IEnumerator Reload(float bonusAttackSpeed = 0f, GameObject launchSelfObject = null) {
-            yield return new WaitForSeconds(1/Mathf.Clamp(attackSpeed + bonusAttackSpeed, 1, 999));
+        public IEnumerator Reload(float reloadTime = 0f, GameObject launchSelfObject = null) {
+            yield return new WaitForSeconds(1/Mathf.Clamp(reloadTime, 1, 999));
             launchSelfObject.GetComponent<SpriteRenderer>().enabled = true;
             canShoot = true;
         }
-    }
 
-    [Serializable]
-    public class Enemy {
-        public string sprite;
-        public Sprite projectile;
-        public int health;
-        public int damage;
-        public int attackSpeed;
-        public int speed;
-        public string name;
-
-        public Enemy(Sprite s) {
-            this.sprite = "Sprites/enemies/" + s;
+        public void Drop(int chance, Transform pos) {
+            if (type == "arm") {
+                for (int i = 0; i < slotNums; i++) {
+                    if (slots.Count > i) {
+                        slots[i].Drop(chance, pos);
+                        slots.RemoveAt(i);
+                    }
+                }
+            }
+            if (Random.Range(0, 100) < chance) {
+                GameObject item = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/ItemDrop"), pos.position, pos.rotation) as GameObject;
+                item.GetComponent<ItemDropController>().part = this;
+                item.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Sprites/" + (type == "arm" ? "arms/" : "weapons/" + type + "_") + "tier" + tier);
+                item.GetComponent<Rigidbody2D>().AddForce(new Vector3(Random.Range(-10f, 10f) * 10f, Random.Range(-10f, 10f) * 10f, 0f));
+            }
         }
     }
 }
